@@ -15,6 +15,11 @@ https://github.com/eMapR/LT-GEE/blob/master/scripts/python/lt_gee_bap_test.py
 import ee
 from typing import List
 
+INDEX_DICT = {
+    "NDVI": {"dist_dir": -1, "bands": ["B4", "B3"]},
+    "NBR": {"dist_dir": -1, "bands": ["B4", "B7"]},
+}
+
 
 def _extract_and_append_date(image: ee.Image, input_list: ee.List) -> ee.List:
     """Given an ee.Image and an ee.List, append the image's date to the list."""
@@ -84,7 +89,11 @@ def _extract_medoid_image(
         return distance.reduce("sum").addBands(image)
 
     distance_from_median = filtered_collection.map(_euclidean_distance)
-    return ee.ImageCollection(distance_from_median).reduce(ee.Reducer.min(7))
+    return (
+        ee.ImageCollection(distance_from_median)
+        .reduce(ee.Reducer.min(7))
+        .set("system:time_start", ee.Date.fromYMD(year, 1, 1).millis())
+    )
 
 
 def _generate_medoid_collection(collection, start_day, end_day):
