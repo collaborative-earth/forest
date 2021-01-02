@@ -16,23 +16,23 @@ import ee
 from typing import List
 
 
-def extract_and_append_date(image: ee.Image, input_list: ee.List) -> ee.List:
+def _extract_and_append_date(image: ee.Image, input_list: ee.List) -> ee.List:
     """Given an ee.Image and an ee.List, append the image's date to the list."""
     date = image.date()
     return ee.List(input_list).add(ee.Date(date))
 
 
-def create_yearly_list(collection: ee.ImageCollection) -> ee.List:
+def _create_yearly_list(collection: ee.ImageCollection) -> ee.List:
     """Given an ee.ImageCollection, return an ee.List containing all the (unique)
     years present in the collection."""
-    dates = collection.iterate(extract_and_append_date, ee.List([]))
+    dates = collection.iterate(_extract_and_append_date, ee.List([]))
 
     years = ee.List(dates).map(lambda date: ee.Date(date).get("year")).distinct().sort()
 
     return years
 
 
-def extract_medoid_image(
+def _extract_medoid_image(
     year: int,
     collection: ee.ImageCollection,
     start_day: str = "06-20",
@@ -87,7 +87,7 @@ def extract_medoid_image(
     return ee.ImageCollection(distance_from_median).reduce(ee.Reducer.min(7))
 
 
-def generate_medioid_collection(collection, start_day, end_day):
+def _generate_medoid_collection(collection, start_day, end_day):
     """Given an ee.ImageCollection and bounds on the start and end days, compute
     an ee.ImageCollection which contains a medoid image for each year present in
     the input collection.
@@ -109,16 +109,16 @@ def generate_medioid_collection(collection, start_day, end_day):
       A collection of yearly medoid images for the provided collection.
     """
 
-    years = create_yearly_list(collection)
+    years = _create_yearly_list(collection)
 
     def _extract_medoid(year):
-        return extract_medoid_image(year, collection, start_day, end_day)
+        return _extract_medoid_image(year, collection, start_day, end_day)
 
     images = years.map(_extract_medoid)
     return ee.ImageCollection.fromImages(images)
 
 
-def mask_landsat_sr(image: ee.Image) -> ee.Image:
+def _mask_landsat_sr(image: ee.Image) -> ee.Image:
     """Apply a mask to a Landsat image to filter out water, cloud, snow, and cloud
     shadow pixels."""
     qa_band = image.select("pixel_qa")
@@ -140,7 +140,7 @@ def mask_landsat_sr(image: ee.Image) -> ee.Image:
     return image.updateMask(qa_mask)
 
 
-def prepare_images(
+def _prepare_images(
     image: ee.Image, input_bands: List[str], output_bands: List[str]
 ) -> ee.Image:
     """Takes an ee.Image object and a list of input and output bands; this function
@@ -169,10 +169,10 @@ def prepare_images(
         "system:time_start", image.get("system:time_start")
     )
 
-    return mask_landsat_sr(resampled_image).select(input_bands, output_bands)
+    return _mask_landsat_sr(resampled_image).select(input_bands, output_bands)
 
 
-def build_TM_collection(
+def _build_TM_collection(
     sensor: str,
     aoi: ee.Geometry,
     start_year: int = 1985,
@@ -207,7 +207,7 @@ def build_TM_collection(
     """
 
     def _prepare_TM(image: ee.Image) -> ee.Image:
-        return prepare_images(
+        return _prepare_images(
             image=image,
             input_bands=["B1", "B2", "B3", "B4", "B5", "B7"],
             output_bands=["B1", "B2", "B3", "B4", "B5", "B7"],
@@ -224,7 +224,7 @@ def build_TM_collection(
     return collection.map(_prepare_TM)
 
 
-def build_OLI_collection(
+def _build_OLI_collection(
     sensor: str,
     aoi: ee.Geometry,
     start_year: int = 1985,
@@ -279,7 +279,7 @@ def build_OLI_collection(
         )
 
     def _prepare_OLI(image: ee.Image) -> ee.Image:
-        return prepare_images(
+        return _prepare_images(
             image=image,
             input_bands=["B2", "B3", "B4", "B5", "B6", "B7"],
             output_bands=["B1", "B2", "B3", "B4", "B5", "B7"],
@@ -296,7 +296,7 @@ def build_OLI_collection(
     return collection.map(_prepare_OLI).map(_harmonization_Roy)
 
 
-def build_combined_Landsat(
+def _build_combined_Landsat(
     aoi: ee.Geometry,
     start_year: int = 1985,
     start_day: int = "06-20",
@@ -328,7 +328,7 @@ def build_combined_Landsat(
       The TM-equivalent bands from Landsat 5, 7, and 8 for the time period and
       region of interest.
     """
-    landsat5 = build_TM_collection(
+    landsat5 = _build_TM_collection(
         sensor="LT05",
         aoi=aoi,
         start_year=start_year,
@@ -337,7 +337,7 @@ def build_combined_Landsat(
         end_day=end_day,
     )
 
-    landsat7 = build_TM_collection(
+    landsat7 = _build_TM_collection(
         sensor="LE07",
         aoi=aoi,
         start_year=start_year,
@@ -346,7 +346,7 @@ def build_combined_Landsat(
         end_day=end_day,
     )
 
-    landsat8 = build_OLI_collection(
+    landsat8 = _build_OLI_collection(
         sensor="LC08",
         aoi=aoi,
         start_year=start_year,
@@ -358,7 +358,7 @@ def build_combined_Landsat(
     return ee.ImageCollection(landsat5.merge(landsat7).merge(landsat8))
 
 
-def main(
+def build_SR_collection(
     aoi: ee.Geometry, start_year: int, start_day: str, end_year: int, end_day: str
 ) -> ee.ImageCollection:
     """
@@ -385,9 +385,65 @@ def main(
       The collection of yearly medoid images.
     """
 
-    combined_landsat = build_combined_Landsat(
+    combined_landsat = _build_combined_Landsat(
         aoi, start_year, start_day, end_year, end_day
     )
-    return generate_medioid_collection(combined_landsat, start_day, end_day).select(
+    return _generate_medoid_collection(combined_landsat, start_day, end_day).select(
         [1, 2, 3, 4, 5, 6], ["B1", "B2", "B3", "B4", "B5", "B7"]
     )
+
+
+def build_LT_collection(
+    collection: ee.ImageCollection, index: str, ftv_list: List[str]
+) -> ee.ImageCollection:
+    """
+    Given a surface reflectance collection produced by build_SR_collection,
+    the spectral index of interest, and a list of bands to include, produce
+    a collection for Landtrendr.
+
+    The first band will be the index of interest, scaled so that an increase
+    in the band value indicates vegetation loss.
+
+    Parameters
+    ----------
+    collection: ee.ImageCollection
+        The collection to prepare for Landtrendr.
+    index: str
+        The spectral index to use. Supported values are 'NDVI' and 'NBR'.
+    ftv_list: List[str]
+        Additional bands to include in the collection.
+    """
+    try:
+        index_info = INDEX_DICT[index]
+    except KeyError:
+        if index in ["NDSI", "NDMI", "TCB", "TCG", "TCW", "TCA", "NBR2"]:
+            # If users provide a valid spectral index, they should get a more helpful
+            # exception explaining the source of the issue than just a random KeyError
+            raise NotImplementedError(
+                f"The index '{index}' is not currently supported. Supported indices are: "
+                + ", ".join(list(INDEX_DICT.keys()))
+            )
+        else:
+            raise RuntimeError(
+                f"The value '{index}' was not recognized as a standard spectral index."
+            )
+
+    dist_dir = index_info["dist_dir"]
+    index_bands = index_info["bands"]
+    ftv_bands = ["ftv_" + band for band in ftv_list]
+
+    # This function should support a spectral index as a FTV, but a clever way to
+    # do this without mixing client- and server-side functions currently eludes me,
+    # so I am going to skip it for now.
+    def _format_images(image):
+        idx = (
+            image.normalizedDifference(index_bands)
+            .rename(index)
+            .multiply(dist_dir * 1000)
+        )
+        ftv_values = image.select(ftv_list, ftv_bands)
+        return idx.addBands(ftv_values).set(
+            "system:time_start", image.get("system:time_start")
+        )
+
+    return collection.map(_format_images)
