@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 This file contains an attempt at implementing a python version of the Landtrendr
-function buildSRcollection.
+function buildSRcollection and buildLTcollection.
 
 See:
     https://emapr.github.io/LT-GEE/api.html#buildsrcollection
+    https://emapr.github.io/LT-GEE/api.html#buildltcollection
     https://www.mdpi.com/2072-4292/10/5/691/htm, in particular section 2.3.2
 
 Additionally, a good deal of inspiration, and in some cases code itself, taken
@@ -375,6 +376,9 @@ def build_SR_collection(
     yearly medoid for each image in the date range using Landsat 5, 7, and 8
     images.
 
+    Python attempt at implementing:
+    https://emapr.github.io/LT-GEE/api.html#buildsrcollection
+
     Parameters
     ----------
     aoi: ee.Geometry
@@ -412,6 +416,9 @@ def build_LT_collection(
 
     The first band will be the index of interest, scaled so that an increase
     in the band value indicates vegetation loss.
+
+    Python attempt at implementing:
+    https://emapr.github.io/LT-GEE/api.html#buildltcollection
 
     Parameters
     ----------
