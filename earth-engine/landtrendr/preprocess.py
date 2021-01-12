@@ -76,28 +76,26 @@ def _extract_medoid_image(
         1, "day"
     )
     filtered_collection = collection.filterDate(start_date, end_date)
-
-    # At this point in LT-GEE implementation, ee.Algorithms.If is used to check
-    # number of input images. However, checking using .gt() appears to not work
-    # with Algorithms.If since it returns a numeric value. For now, punt on
-    # figuring this out and just assume we have a non-empty collection at this point.
-    # https://github.com/eMapR/LT-GEE/blob/b0e92a0c198bdd1a794e1e9b8f4db8fc7fa06054/scripts/python/lt_gee_bap_test.py#L104
-
-    median = filtered_collection.median()
+    empty_col = ee.ImageCollection([ee.Image([0,0,0,0,0,0]).mask(ee.Image(0))]);
+    non_empty = filtered_collection.toList(1).length().gt(0)
+    final_collection = ee.ImageCollection(ee.Algorithms.If(non_empty, filtered_collection, empty_col))
+    median = final_collection.median()
 
     def _euclidean_distance(image: ee.Image) -> ee.Image:
         distance = ee.Image(image).subtract(median).pow(ee.Image.constant(2))
         return distance.reduce("sum").addBands(image)
 
-    distance_from_median = filtered_collection.map(_euclidean_distance)
+    distance_from_median = final_collection.map(_euclidean_distance)
     return (
         ee.ImageCollection(distance_from_median)
         .reduce(ee.Reducer.min(7))
-        .set("system:time_start", ee.Date.fromYMD(year, 1, 1).millis())
+        .set("system:time_start", ee.Date.fromYMD(year, 8, 1).millis())
     )
 
 
-def _generate_medoid_collection(collection, start_day, end_day):
+def _generate_medoid_collection(
+    collection: ee.ImageCollection, start_day: str, end_day: str
+) -> ee.ImageCollection:
     """Given an ee.ImageCollection and bounds on the start and end days, compute
     an ee.ImageCollection which contains a medoid image for each year present in
     the input collection.
@@ -428,6 +426,11 @@ def build_LT_collection(
         The spectral index to use. Supported values are 'NDVI' and 'NBR'.
     ftv_list: List[str]
         Additional bands to include in the collection.
+
+    Returns
+    -------
+    ee.ImageCollection
+      The collection of yearly medoid images.
     """
     try:
         index_info = INDEX_DICT[index]
@@ -446,7 +449,7 @@ def build_LT_collection(
 
     dist_dir = index_info["dist_dir"]
     index_bands = index_info["bands"]
-    ftv_bands = ["ftv_" + band for band in ftv_list]
+    ftv_bands = ["ftv_" + band.lower() for band in ftv_list]
 
     # This function should support a spectral index as a FTV, but a clever way to
     # do this without mixing client- and server-side functions currently eludes me,
