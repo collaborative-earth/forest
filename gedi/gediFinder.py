@@ -56,7 +56,7 @@ urlList = [
        'output=%s' % (output)
 ]
 
-url = '?'.join([lpdaac, '&'.join(urlList)])
+url = lpdaac + "?" + '&'.join(urlList)
 
 """## Get list of granules"""
 
