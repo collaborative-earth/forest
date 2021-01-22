@@ -50,10 +50,10 @@ output = 'json'
 
 # Join together components of url
 urlList = [
-       'product=%s' % (productLevel1B),
-       'version=%s' % (version),
-       'bbox=[%s]' % (bbox),
-       'output=%s' % (output)
+       f'product={productLevel1B}',
+       f'version={version}',
+       f'bbox={bbox}',
+       f'output={output}'
 ]
 
 url = lpdaac + "?" + '&'.join(urlList)
