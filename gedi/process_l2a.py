@@ -1,10 +1,12 @@
 import argparse
 import h5py
-import numpy as np
 import os
+import numpy as np
 import pandas as pd
+import geopandas as gp
 
 from typing import List
+from shapely.geometry import Point
 
 
 def gedi_L2A_to_df(
@@ -196,6 +198,27 @@ def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
     df["d03"] = pd.Series(d03)
     df["d04"] = pd.Series(d04)
 
+def df_to_geojson(df, outfile):
+    """
+    Convert pandas dataframe to GeoJSON file and save as given file name and path.
+    This file type can be useful when working locally in GIS software.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame, assumed to be the output of gedi_L2A_to_df, with or without
+        canopy height metrics appended.
+    outfile : string
+        The location and filename of output json file.
+
+    Returns
+    -------
+    None
+    """
+    df['geometry'] = df.apply(lambda row: Point(row.lon_lowestmode, row.lat_lowestmode), axis=1)
+    GeoDF = gp.GeoDataFrame(df)
+    GeoDF = GeoDF.drop(columns=['lat_lowestmode','lon_lowestmode'])
+    GeoDF.to_file(outfile, driver='GeoJSON')
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
