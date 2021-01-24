@@ -165,7 +165,7 @@ def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
 
     Side Effects
     ------------
-    Modifies the provided pd.DataFrame in-place to add canopy metrics. 
+    Modifies the provided pd.DataFrame in-place to add canopy metrics.
 
     Returns
     -------
