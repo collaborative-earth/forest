@@ -174,40 +174,33 @@ def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
     rh = np.stack(df.rh.to_numpy())
     canopy_returns = np.ma.masked_less(rh, canopy_threshold)
 
-    canopy_max = np.max(canopy_returns, axis=1)
-    canopy_min = np.min(canopy_returns, axis=1)
-    canopy_std = np.std(canopy_returns, axis=1)
-    canopy_avg = np.average(canopy_returns, axis=1)
-    dns = canopy_returns.count(axis=1)  # % all returns >= canopy threshold
+    df["canopy_max"] = pd.Series(np.max(canopy_returns, axis=1))
+    df["canopy_min"] = pd.Series(np.min(canopy_returns, axis=1))
+    df["canopy_std"] = pd.Series(np.std(canopy_returns, axis=1))
+    df["canopy_avg"] = pd.Series(np.average(canopy_returns, axis=1))
+    df["dns"] = pd.Series(
+        canopy_returns.count(axis=1)
+    )  # % all returns >= canopy threshold
 
     canopy_returns = np.ma.filled(canopy_returns, np.nan)
-    canopy_p10 = _compute_nan_percentile(canopy_returns, 10)
-    canopy_p25 = _compute_nan_percentile(canopy_returns, 25)
-    canopy_p50 = _compute_nan_percentile(canopy_returns, 50)
-    canopy_p75 = _compute_nan_percentile(canopy_returns, 75)
-    canopy_p90 = _compute_nan_percentile(canopy_returns, 90)
+    df["canopy_p10"] = pd.Series(_compute_nan_percentile(canopy_returns, 10))
+    df["canopy_p25"] = pd.Series(_compute_nan_percentile(canopy_returns, 25))
+    df["canopy_p50"] = pd.Series(_compute_nan_percentile(canopy_returns, 50))
+    df["canopy_p75"] = pd.Series(_compute_nan_percentile(canopy_returns, 75))
+    df["canopy_p90"] = pd.Series(_compute_nan_percentile(canopy_returns, 90))
 
-    d01 = np.ma.masked_outside(rh, canopy_threshold, 5).count(
-        axis=1
+    df["d01"] = pd.Series(
+        np.ma.masked_outside(rh, canopy_threshold, 5).count(axis=1)
     )  # % returns >= canopy, <=5m
-    d02 = np.ma.masked_outside(rh, 5, 10).count(axis=1)  # % returns >= 5m, <=10m
-    d03 = np.ma.masked_outside(rh, 10, 20).count(axis=1)  # % returns >= 10m, <=20m
-    d04 = np.ma.masked_outside(rh, 20, 30).count(axis=1)  # % returns >= 20m, <=30m
-
-    df["canopy_max"] = pd.Series(canopy_max)
-    df["canopy_min"] = pd.Series(canopy_min)
-    df["canopy_std"] = pd.Series(canopy_std)
-    df["canopy_avg"] = pd.Series(canopy_avg)
-    df["canopy_p10"] = pd.Series(canopy_p10)
-    df["canopy_p25"] = pd.Series(canopy_p25)
-    df["canopy_p50"] = pd.Series(canopy_p50)
-    df["canopy_p75"] = pd.Series(canopy_p75)
-    df["canopy_p90"] = pd.Series(canopy_p90)
-    df["dns"] = pd.Series(dns)
-    df["d01"] = pd.Series(d01)
-    df["d02"] = pd.Series(d02)
-    df["d03"] = pd.Series(d03)
-    df["d04"] = pd.Series(d04)
+    df["d02"] = pd.Series(
+        np.ma.masked_outside(rh, 5, 10).count(axis=1)
+    )  # % >= 5m, <=10m
+    df["d03"] = pd.Series(
+        np.ma.masked_outside(rh, 10, 20).count(axis=1)
+    )  # % >= 10m, <=20m
+    df["d04"] = pd.Series(
+        np.ma.masked_outside(rh, 20, 30).count(axis=1)
+    )  # % >= 20m, <=30m
 
 
 def df_to_geojson(df, outfile):
@@ -278,7 +271,7 @@ if __name__ == "__main__":
     append_canopy_metrics(df, canopy_threshold=2)
     del df["rh"]
     if args.filetype.lower() == "csv":
-        df.to_csv(f"{args.dir}{args.outfile}.csv")
+        df.to_csv(f"{args.dir}{args.outfile}.csv", index=False)
     elif args.filetype.lower() == "parquet":
         df.to_parquet(f"{args.dir}{args.outfile}.parquet.gzip", compression="gzip")
     elif args.filetype.lower() == "geojson":
