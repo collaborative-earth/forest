@@ -142,10 +142,17 @@ def _compute_nan_percentile(a: np.ndarray, q: float) -> np.array:
 
 def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
     """
-    The least bad option for computing these canopy metrics seems to be using
-    np.ma module to work with masked arrays. Not converting out of Pandas is
-    untenable due to computation time, and the variable dimension of rows means
-    np converts the result of applying the mask to the 2d array to a 1d array.
+    This function takes a pd.DataFrame object and a numerical value corresponding
+    to the height threshold to consider a return as coming from the forest canopy.
+    It extracts the "rh" column from the provided DataFrame as an np.ndarray,
+    applies a mask, and computes the relevant canopy metrics which are then
+    appended to the provided DataFrame.
+
+    Note: the least bad option for computing these canopy metrics seemed to be
+    using np.ma module to work with masked arrays. Not converting out of Pandas is
+    untenable due to computation time, and the varying dimension of rows when
+    subset to canopy-only observations means np converts the result of applying
+    the mask to the 2d array to a 1d array.
 
     Parameters
     ----------
@@ -155,6 +162,10 @@ def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
         labeled "rh" which is array-valued.
     canopy_threshold : float
         The minimum value for a return to be considered a "canopy" return.
+
+    Side Effects
+    ------------
+    Modifies the provided pd.DataFrame in-place to add canopy metrics. 
 
     Returns
     -------
