@@ -198,6 +198,7 @@ def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
     df["d03"] = pd.Series(d03)
     df["d04"] = pd.Series(d04)
 
+
 def df_to_geojson(df, outfile):
     """
     Convert pandas dataframe to GeoJSON file and save as given file name and path.
@@ -208,17 +209,20 @@ def df_to_geojson(df, outfile):
     df : pd.DataFrame
         The DataFrame, assumed to be the output of gedi_L2A_to_df, with or without
         canopy height metrics appended.
-    outfile : string
+    outfile : str
         The location and filename of output json file.
 
     Returns
     -------
     None
     """
-    df['geometry'] = df.apply(lambda row: Point(row.lon_lowestmode, row.lat_lowestmode), axis=1)
+    df["geometry"] = df.apply(
+        lambda row: Point(row.lon_lowestmode, row.lat_lowestmode), axis=1
+    )
     GeoDF = gp.GeoDataFrame(df)
-    GeoDF = GeoDF.drop(columns=['lat_lowestmode','lon_lowestmode'])
-    GeoDF.to_file(outfile, driver='GeoJSON')
+    GeoDF = GeoDF.drop(columns=["lat_lowestmode", "lon_lowestmode"])
+    GeoDF.to_file(outfile, driver="GeoJSON")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -239,6 +243,12 @@ if __name__ == "__main__":
         ),
         default="gedi_output",
     )
+    parser.add_argument(
+        "-f",
+        "--filetype",
+        help="The type of file to output. Acceptable formats are: csv, parquet, GeoJSON.",
+        default="parquet",
+    )
     args = parser.parse_args()
 
     ul_lat = 43.38
@@ -256,4 +266,14 @@ if __name__ == "__main__":
     df = gedi_L2A_to_df(args.dir, files, bbox)
     append_canopy_metrics(df, canopy_threshold=2)
     del df["rh"]
-    df.to_parquet(f"{args.dir}{args.outfile}.parquet.gzip", compression="gzip")
+    if args.filetype.lower() == "csv":
+        df.to_csv(f"{args.dir}{args.outfile}.csv")
+    elif args.filetype.lower() == "parquet":
+        df.to_parquet(f"{args.dir}{args.outfile}.parquet.gzip", compression="gzip")
+    elif args.filetype.lower() == "geojson":
+        df_to_geojson(df, f"{args.dir}{args.outfile}.geojson")
+    else:
+        raise ValueError(
+            f"Received unsupported file type {args.filetype}. Please provide one "
+            "of: csv, parquet, or GeoJSON."
+        )
