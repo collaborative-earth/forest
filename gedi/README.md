@@ -10,44 +10,63 @@ We must therefore develop a methodology that can quickly find, retrieve, downloa
 open terminal
 
 In terminal:
+
 conda activate pyGEDI
-cd /Users/ryancarlson/Earthshot_Labs/Carbon/GEDI/Data/L2A_PNW/Test
+
+cd loc
 python gediFinder.py -b ul_lat,ul_lon,lr_lat,lr_lon -l 2a	
 
 open granule_list.txt
+
 copy contents
 
 ## EarthData Search
 open safari
+
 go to https://search.earthdata.nasa.gov/search
+
 Search collections for gedi 2a
+
 Click on GEDI L2A Elevation and Height Metrics Data Global Footprint Level V001
+
 Paste granule list in granule search on left side and press enter
+
 Click download all button
+
 click edit options on left side
+
 Select customize
+
 Select "Click to enable" in spatial subsetting"
+
 Enter in appropriate bounds for the boundign box
 	North -> ul_lat
 	West  -> ul_lon
 	East  -> lr_lon
 	South -> lr_lat
+	
 Click Done
+
 Click Download Data
 
 Wait until data has been processed by Nasa. This could take anywhere from a few minutes to multiple days depending on the size of the bounding box and other variables on the server side.
 
 # GEDI Combine
 open safari
+
 navigate to download page in Earthdata Search
+
 open html file (first file listed in download links)
+
 Download first zip file
 
 open Finder
 Open README in unzipped file
+
 Create new text file to store zip urls
 
-open terminal (again)
+open terminal
 
 In terminal:
+
 python gediCombine_individual.py -d DirectoryPath -t FilePath -o gedi_output -f csv -b ul_lat,ul_lon,lr_lat,lr_lon
