@@ -1,4 +1,53 @@
 # GEDI
-This folder is intended for code relating to data from the [GEDI](https://gedi.umd.edu/) mission. The Level 1B, Level 2A, and Level 2B data from GEDI are of particular interest for our work here.
+This folder is intended for code relating to data from the [GEDI](https://gedi.umd.edu/) mission. The Level 2A data from GEDI are of particular interest for our work here. This dataset allows us to measure canopy heights for large swaths of land at approximately 30m resolution.
 
-Currently, we are using the rGEDI package (see: [CRAN](https://cran.r-project.org/web/packages/rGEDI/index.html), [tutorial](https://cran.r-project.org/web/packages/rGEDI/vignettes/tutorial.html), [paper](https://www.researchgate.net/publication/339971349_rGEDI_An_R_Package_for_NASA%27s_Global_Ecosystem_Dynamics_Investigation_GEDI_Data_Visualizing_and_Processing), [source](https://github.com/carlos-alberto-silva/rGEDI)) to download and process the data from GEDI. As a result, a considerable amount of code here will likely be in R. 
+# GEDI Retrieval
+The GEDI mission is a relatively new mission to the story of Earth Observation, and is still currently taking data of the Earth's surface while aboard the International Space Station. Thus the GEDI data is still in a rudimentary form. When downloaded, the entire Level 2A dataset available as of 3 February 2021 is nearly 40 TB. This is too big for many individuals to work with, and time needed to download that much data to an individual machine would be too great for the highly adaptive work we are doing.
+
+We must therefore develop a methodology that can quickly find, retrieve, download, and gather the appropriate data for our purpose. Here, we present such a methodology that utilizes the NASA LP DAAC GEDI Data Finder service (https://lpdaac.usgs.gov/news/release-gedi-finder-web-service/) and the NASA EarthData Search application (https://earthdata.nasa.gov) to accomplish this task.
+
+## GEDI Finder
+open terminal
+
+In terminal:
+conda activate pyGEDI
+cd /Users/ryancarlson/Earthshot_Labs/Carbon/GEDI/Data/L2A_PNW/Test
+python gediFinder.py -b ul_lat,ul_lon,lr_lat,lr_lon -l 2a	
+
+open granule_list.txt
+copy contents
+
+## EarthData Search
+open safari
+go to https://search.earthdata.nasa.gov/search
+Search collections for gedi 2a
+Click on GEDI L2A Elevation and Height Metrics Data Global Footprint Level V001
+Paste granule list in granule search on left side and press enter
+Click download all button
+click edit options on left side
+Select customize
+Select "Click to enable" in spatial subsetting"
+Enter in appropriate bounds for the boundign box
+	North -> ul_lat
+	West  -> ul_lon
+	East  -> lr_lon
+	South -> lr_lat
+Click Done
+Click Download Data
+
+Wait until data has been processed by Nasa. This could take anywhere from a few minutes to multiple days depending on the size of the bounding box and other variables on the server side.
+
+# GEDI Combine
+open safari
+navigate to download page in Earthdata Search
+open html file (first file listed in download links)
+Download first zip file
+
+open Finder
+Open README in unzipped file
+Create new text file to store zip urls
+
+open terminal (again)
+
+In terminal:
+python gediCombine_individual.py -d DirectoryPath -t FilePath -o gedi_output -f csv -b ul_lat,ul_lon,lr_lat,lr_lon
