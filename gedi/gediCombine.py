@@ -175,20 +175,18 @@ def _compute_nan_percentile(a: np.ndarray, q: float) -> np.array:
     """
     if q < 0 or q > 100:
         raise ValueError(f"Expected a value between 0 and 100; received {q} instead.")
-    mask = (a >= np.nanmin(a)).astype(int)
-
-    count = mask.sum(axis=1)
-    groups = np.unique(count)
-    groups = groups[groups > 0]
-
+    a = np.sort(a, axis =1)
+    count = (~np.isnan(a)).sum(axis=1) # count number of non-nans in row
+    groups = np.unique(count)     # returns sorted unique values
+    groups = groups[groups > 0]   # only returns groups with at least 1 non-nan value\n",
+    
     p = np.zeros((a.shape[0]))
-    for g in range(len(groups)):
-        pos = np.where(count == groups[g])
+    for group in groups:
+        pos = np.where(count == group)
         values = a[pos]
-        values = np.nan_to_num(values, nan=(np.nanmin(a) - 1))
-        values = np.sort(values, axis=1)
-        values = values[:, -groups[g] :]
+        values = values[:, :group]
         p[pos] = np.percentile(values, q, axis=1)
+    
     return p
 
 
