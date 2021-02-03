@@ -5,10 +5,13 @@ within a bounding box.
 
 To Run
 ----------
-
+python gediFinder.py -d DirectoryPath -b ul_lat,ul_lon,lr_lat,lr_lon -l level -o granule_list
 
 Arguments
 -------
+    -d,--dir : str
+        The directory containing url txt file, formatted with a trailing slash,
+        such that {dir}{fname} is a valid path, for fname a valid file name.
     -b, --bbox : str
         The bounding box of the region of interest. In format
         ul_lat,ul_lon,lr_lat,lr_lon
@@ -23,14 +26,13 @@ Arguments
 
 Outputs
 -------
-Writes granule list to a txt file in
+Writes granule list to a txt file in directory
 """
 
 import requests
 import argparse
 
 from urllib.parse import urlencode
-from typing import List
 
 def gediFinder(
     level: str,
@@ -65,7 +67,6 @@ def gediFinder(
     payload_str = urlencode(payload, safe=',')
 
     r = requests.get(lpdaac, params = payload_str)
-
     if r.status_code == requests.codes.ok:
         print('Success!')
 
