@@ -51,7 +51,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gp
 
-from tqdm import tqdm
 from typing import List
 from shutil import rmtree
 from shapely.geometry import Point
