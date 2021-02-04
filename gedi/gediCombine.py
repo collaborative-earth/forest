@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This program goes through the following process:
     Download GEDI HDF5 files
@@ -41,6 +42,7 @@ Outputs
 Generates file of input filetype with Level 2B data retrieved from GEDI servers.
 """
 
+import validators
 import argparse
 import requests
 import zipfile
@@ -139,7 +141,7 @@ def gedi_L2A_to_df(
                     for layer in layers:
                         tmp_df[layer] = _f[beam][layer][()][mask].tolist()
 
-                    append_canopy_metrics(tmp_df, canopy_threshold=2)
+                    _append_canopy_metrics(tmp_df, canopy_threshold=2)
                     del tmp_df["rh"]
 
                     df = df.append(tmp_df)
@@ -178,18 +180,18 @@ def _compute_nan_percentile(a: np.ndarray, q: float) -> np.array:
     count = (~np.isnan(a)).sum(axis=1) # count number of non-nans in row
     groups = np.unique(count)     # returns sorted unique values
     groups = groups[groups > 0]   # only returns groups with at least 1 non-nan value\n",
-    
+
     p = np.zeros((a.shape[0]))
     for group in groups:
         pos = np.where(count == group)
         values = a[pos]
         values = values[:, :group]
         p[pos] = np.percentile(values, q, axis=1)
-    
+
     return p
 
 
-def append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
+def _append_canopy_metrics(df: pd.DataFrame, canopy_threshold: float) -> None:
     """
     This function takes a pd.DataFrame object and a numerical value corresponding
     to the height threshold to consider a return as coming from the forest canopy.
@@ -362,32 +364,34 @@ if __name__ == "__main__":
 
     with open(str(args.textfile), 'r') as texturls:
         for url in texturls:
-            status = download_url(url, args.dir)
-            if status:
-                continue
-            else:
+            if validators.url(url):
+
+                status = download_url(url, args.dir)
+                if status:
+                    continue
+                else:
+                    print("------------------------------------------")
+                    break
+
+                # Make list of filepaths
+                filepaths = [
+                    os.path.join(root, file)
+                    for root, dir, files in os.walk(args.dir, topdown = False)
+                    for file in files
+                    if file.endswith('.h5')
+                ]
+
+                tmp_df = gedi_L2A_to_df(filepaths, bbox = bbox)
+
+                # append data to dataframe
+                df = df.append(tmp_df)
+                print(f"Appended {len(tmp_df)} lines to dataframe")
+
+                # Delete hdf5 files
+                for filepath in filepaths:
+                    rmtree(os.path.dirname(filepath))
+
                 print("------------------------------------------")
-                break
-
-            # Make list of filepaths
-            filepaths = [
-                os.path.join(root, file)
-                for root, dir, files in os.walk(args.dir, topdown = False)
-                for file in files
-                if file.endswith('.h5')
-            ]
-
-            tmp_df = gedi_L2A_to_df(filepaths, bbox = bbox)
-
-            # append data to dataframe
-            df = df.append(tmp_df)
-            print(f"Appended {len(tmp_df)} lines to dataframe")
-
-            # Delete hdf5 files
-            for filepath in filepaths:
-                rmtree(os.path.dirname(filepath))
-
-            print("------------------------------------------")
 
     if df.empty:
         print("DataFrame is empty. Not writing data to file")
