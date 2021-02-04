@@ -57,7 +57,7 @@ The following is pasted **directly** from the [GEDI Spatial Querying and Subsett
 
 > 1. **Access Earthdata Search**
 >
-> After *obtaining a comma-separated list of GEDI granules with [GEDIFinder](#gedi finder)*, open [NASA Earthdata Search](https://search.earthdata.nasa.gov/). Sign in with Earthdata Login credentials or [register](https://urs.earthdata.nasa.gov/users/new) for a new account.
+> After *obtaining a comma-separated list of GEDI granules with [GEDIFinder](###gedi finder)*, open [NASA Earthdata Search](https://search.earthdata.nasa.gov/). Sign in with Earthdata Login credentials or [register](https://urs.earthdata.nasa.gov/users/new) for a new account.
 >
 > Note: Currently there are no spatial searching capabilities for the GEDI Version 1 datasets in Earthdata Search.
 >
@@ -67,7 +67,8 @@ The following is pasted **directly** from the [GEDI Spatial Querying and Subsett
 > All available granules for the product will be included in the list of matching granules.
 >
 > 3. **Search for Granules**
-> Copy the list of comma-separated granule IDs *obtained with [GEDIFinder](#gedi finder)* and paste it into the Granule Search box in Earthdata Search. Use the Enter key to initiate the search.
+>
+> Copy the list of comma-separated granule IDs *obtained with [GEDIFinder](###gedi finder)* and paste it into the Granule Search box in Earthdata Search. Use the Enter key to initiate the search.
 >
 > 4. **Select spatial and/or layer parameters for GEDI granules**
 >
