@@ -112,7 +112,7 @@ This program cycles through the list of urls supplied, conducting the following 
 After each zip file has been processed and deleted, the DataFrame is written to a csv, parquet, or GeoJSON file, depending on inputs from the user.
 
 #### To Run
-`python gediCombine_individual.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv` [source](gediCombine.py)
+`python gediCombine.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv` [source](gediCombine.py)
 
 #### Arguments
 1. **-d,--dir** : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This script is meant to create a GediFinder URL and get the corresponding list of granules within a
 user-defined bounding box. This list can then be used in the Earthdata Search Tool to pull data from
@@ -29,6 +30,7 @@ Outputs
 Writes granule list to a txt file in directory
 """
 
+import os
 import requests
 import argparse
 
@@ -68,7 +70,7 @@ def gediFinder(
 
     r = requests.get(lpdaac, params = payload_str)
     if r.status_code == requests.codes.ok:
-        print('Success!')
+        print('Granules successfully gathered!')
 
         granules = [g.split('/')[-1] for g in r.json()['data']] # take filename from url
         return ','.join(granules)
@@ -131,5 +133,9 @@ if __name__ == "__main__":
             f"Recieved unsupported data level {args.level}. Please provide 1B, 2A, or 2B"
         )
 
+    print("------------------------------------------")
+
     with open(os.path.join(args.dir, args.outfile + ".txt"), 'w+') as file:
         file.write(gediFinder(level, args.bbox))
+
+    print("------------------------------------------")
