@@ -56,8 +56,7 @@ Pages 2-4 in the [GEDI Spatial Querying and Subsetting Quick Guide](https://lpda
 The following is pasted **directly** from the [GEDI Spatial Querying and Subsetting Quick Guide](https://lpdaac.usgs.gov/documents/635/GEDI_Quick_Guide.pdf). Some modifications have been made for readability and context and are *emphasized*.
 
 > 1. **Access Earthdata Search**
->
-> After *obtaining a comma-separated list of GEDI granules with [GEDIFinder](###gedi finder)*, open [NASA Earthdata Search](https://search.earthdata.nasa.gov/). Sign in with Earthdata Login credentials or [register](https://urs.earthdata.nasa.gov/users/new) for a new account.
+> After *obtaining a comma-separated list of GEDI granules with GEDI Finder* , open [NASA Earthdata Search](https://search.earthdata.nasa.gov/). Sign in with Earthdata Login credentials or [register](https://urs.earthdata.nasa.gov/users/new) for a new account.
 >
 > Note: Currently there are no spatial searching capabilities for the GEDI Version 1 datasets in Earthdata Search.
 >
@@ -68,7 +67,7 @@ The following is pasted **directly** from the [GEDI Spatial Querying and Subsett
 >
 > 3. **Search for Granules**
 >
-> Copy the list of comma-separated granule IDs *obtained with [GEDIFinder](###gedi finder)* and paste it into the Granule Search box in Earthdata Search. Use the Enter key to initiate the search.
+> Copy the list of comma-separated granule IDs *obtained with GEDI Finder* and paste it into the Granule Search box in Earthdata Search. Use the Enter key to initiate the search.
 >
 > 4. **Select spatial and/or layer parameters for GEDI granules**
 >
@@ -91,6 +90,14 @@ The following is pasted **directly** from the [GEDI Spatial Querying and Subsett
 > A status update email for the data processing request will be delivered when the order has completed. The order completion email contains URLs for accessing the data outputs.
 > Please note that the URLs have an expiration date and are only valid for one week.
 
+There are a few more steps we implement to prepare the data for download and extraction with GEDI Combine.
+
+7. **Get List of Zip File URLs**
+
+Copy the url ending with `.zip?1` and paste into the web browser of your choosing.
+The ZIP file should begin downloading.
+Once the file has completed downloading, unzip the file and access the README file in the unzipped folder.
+This README file will be used as the `--textfile` argument when running the GEDI Combine script.
 
 ### GEDI Combine
 The NASA EarthData Search will collect, clip, and process the GEDI granules, creating a number of zip files with the processed data to download.
@@ -105,14 +112,14 @@ This program cycles through the list of urls supplied, conducting the following 
 After each zip file has been processed and deleted, the DataFrame is written to a csv, parquet, or GeoJSON file, depending on inputs from the user.
 
 #### To Run
-`python gediCombine_individual.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv ` [source](gediCombine.py)
+`python gediCombine_individual.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv` [source](gediCombine.py)
 
 #### Arguments
-1. ***-d,--dir*** : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
-2. ***-t,--textfile*** : The file path for the txt file containing the downloaded urls of the zip files, supplied by EarthData Search.
-3. ***-b,--bbox*** : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon
-4. ***-o,--outfile*** *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *gedi_output*.
-5. ***-f,--filetype*** *(optional)* : The type of file to output. Acceptable formats are: csv, parquet, GeoJSON. The default argument if none is given is *csv*.
+1. **-d,--dir** : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
+2. **-t,--textfile** : The file path for the txt file containing the downloaded urls of the zip files, supplied by EarthData Search.
+3. **-b,--bbox** : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon
+4. **-o,--outfile** *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *gedi_output*.
+5. **-f,--filetype** *(optional)* : The type of file to output. Acceptable formats are: csv, parquet, GeoJSON. The default argument if none is given is *csv*.
 
 #### Output
 Generates file of input filetype with Level 2B data retrieved from GEDI servers.
