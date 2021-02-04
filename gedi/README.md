@@ -91,7 +91,7 @@ The following is pasted **directly** from the [GEDI Spatial Querying and Subsett
 > A status update email for the data processing request will be delivered when the order has completed. The order completion email contains URLs for accessing the data outputs.
 > Please note that the URLs have an expiration date and are only valid for one week.
 
-There are a few more steps we implement to prepare the data for download and extraction with GEDI Combine.
+There is another step we implement to prepare the data for download and extraction with GEDI Combine.
 
 7. **Get List of Zip File URLs**
 
