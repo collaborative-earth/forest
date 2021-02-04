@@ -42,10 +42,10 @@ The list of granules is used to select the appropriate granules to download in t
 `python gediFinder.py -d DirectoryPath -b ul_lat,ul_lon,lr_lat,lr_lon -l 2a` ([source](gediFinder.py))
 
 #### Arguments
-1. `-d,--dir` : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
-2. `-b, --bbox` : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon.
-3. `-l,--level` *(optional)* : The data product level of interest. Acceptable answers at this time are 1B, 2A, or 2B with default of 2A. The default argument if none is given is *2A*.
-4. `-o,--outfile` *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *granule_list*.
+- `-d,--dir` : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
+- `-b, --bbox` : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon.
+- `-l,--level` *(optional)* : The data product level of interest. Acceptable answers at this time are 1B, 2A, or 2B with default of 2A. The default argument if none is given is *2A*.
+- `-o,--outfile` *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *granule_list*.
 
 #### Output
 Text file with a comma-separated list of GEDI granules that intersect user-defined bounding box
@@ -116,11 +116,11 @@ After each zip file has been processed and deleted, the DataFrame is written to 
 `python gediCombine_individual.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv` ([source](gediCombine.py))
 
 #### Arguments
-1. `-d,--dir` : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
-2. `-t,--textfile` : The file path for the txt file containing the downloaded urls of the zip files, supplied by EarthData Search.
-3. `-b,--bbox` : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon
-4. `-o,--outfile` *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *gedi_output*.
-5. `-f,--filetype` *(optional)* : The type of file to output. Acceptable formats are: csv, parquet, GeoJSON. The default argument if none is given is *csv*.
+- `-d,--dir` : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
+- `-t,--textfile` : The file path for the txt file containing the downloaded urls of the zip files, supplied by EarthData Search.
+- `-b,--bbox` : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon
+- `-o,--outfile` *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *gedi_output*.
+- `-f,--filetype` *(optional)* : The type of file to output. Acceptable formats are: csv, parquet, GeoJSON. The default argument if none is given is *csv*.
 
 #### Output
 Generates file of input filetype with Level 2B data retrieved from GEDI servers.
