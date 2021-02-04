@@ -7,10 +7,25 @@ This dataset allows us to measure canopy heights for large swaths of land at app
 The GEDI mission is a relatively new mission to the story of Earth Observation, and is still currently taking data of the Earth's surface while aboard the International Space Station.
 Thus the GEDI data is still in a rudimentary form.
 When downloaded, the entire Level 2A dataset available as of 3 February 2021 is nearly 40 TB.
-This is too big for many individuals to work with, and time needed to download that much data to an individual machine would be too great for the highly adaptive work we are doing.
+This is too big for many individuals to work with on their personal machines, and time needed to download that much data would be too great for the highly adaptive workflow we are implement.
 
 We must therefore develop a methodology that can quickly find, retrieve, download, and gather the appropriate data for our purpose.
 Here, we present such a methodology that utilizes the [NASA LP DAAC GEDI Data Finder service](https://lpdaac.usgs.gov/news/release-gedi-finder-web-service/) and the [NASA EarthData Search application](https://earthdata.nasa.gov/search) to accomplish this task.
+
+## Dependencies
+* `io`
+* `os`
+* `h5py`
+* `numpy`
+* `pandas`
+* `zipfile`
+* `argparse`
+* `requests`
+* `geopandas `
+* `List from typing`
+* `remtree from shutil`
+* `Point from shapely.geometry`
+* `urlencode from urllib.parse`
 
 ### GEDI Finder
 
@@ -36,35 +51,43 @@ The list of granules is used to select the appropriate granules to download in t
 Text file with a comma-separated list of GEDI granules that intersect user-defined bounding box
 
 ### EarthData Search
-open safari
 
-go to https://search.earthdata.nasa.gov/search
+Pages 2-4 in the [GEDI Spatial Querying and Subsetting Quick Guide](https://lpdaac.usgs.gov/documents/635/GEDI_Quick_Guide.pdf) provides a great overview of the process we implement in relation to data collection from [NASA EarthData Search application](https://earthdata.nasa.gov/search).
+The following is pasted ***directly*** from the [GEDI Spatial Querying and Subsetting Quick Guide](https://lpdaac.usgs.gov/documents/635/GEDI_Quick_Guide.pdf). Some modifications have been made for readability and context and are *emphasized*.
 
-Search collections for gedi 2a
+1. ***Access Earthdata Search***
 
-Click on GEDI L2A Elevation and Height Metrics Data Global Footprint Level V001
+After *obtaining a comma-separated list of GEDI granules with [GEDIFinder](#gedi finder)*, open [NASA Earthdata Search](https://search.earthdata.nasa.gov/). Sign in with Earthdata Login credentials or [register](https://urs.earthdata.nasa.gov/users/new) for a new account.
 
-Paste granule list in granule search on left side and press enter
+Note: Currently there are no spatial searching capabilities for the GEDI Version 1 datasets in Earthdata Search.
 
-Click download all button
+2. ***Search for Dataset***
 
-click edit options on left side
+Search for a collection by entering the dataset short name *(e.g. GEDI02_A)* into the search box then select the desired product from the list of matching collections.
+All available granules for the product will be included in the list of matching granules.
 
-Select customize
+3. ***Search for Granules***
+Copy the list of comma-separated granule IDs *obtained with [GEDIFinder](#gedi finder)* and paste it into the Granule Search box in Earthdata Search. Use the Enter key to initiate the search.
 
-Select "Click to enable" in spatial subsetting"
+4. ***Select spatial and/or layer parameters for GEDI granules***
 
-Enter in appropriate bounds for the boundign box
-	North -> ul_lat
-	West  -> ul_lon
-	East  -> lr_lon
-	South -> lr_lat
+Click on the green Download All button to open the download and order menu. Under “Select Data Access Method,” select Customize.
 
-Click Done
+To set up the parameters for clipping out a smaller area of the granule, scroll down to the Spatial Subsetting section.
+Check the box next to Click to Enable and enter coordinates of the bounding box for the ROI.
 
-Click Download Data
+To select specific science dataset layers, scroll down to the Band Subsetting section. Expand the directories and select the desired layers. Additional information for each of the data layers can be found on the [GEDI01_B](https://doi.org/10.5067/GEDI/GEDI01_B.001), [GEDI02_A](https://doi.org/10.5067/GEDI/GEDI02_A.001), or [GEDI02_B](https://doi.org/10.5067/GEDI/GEDI02_B.001) Digital Object Identifier (DOI) landing page.
 
-Wait until data has been processed by Nasa. This could take anywhere from a few minutes to multiple days depending on the size of the bounding box and other variables on the server side.
+5. ***Place Order***
+
+After the desired parameters for spatial and/or layer subsetting have been selected, click Done to complete the custom order form then click Download Data to initiate the order.
+When the data request is submitted, an order confirmation email is sent to the email address associated with the Earthdata login credentials or specified in the custom order form.
+
+6. ***Retrieve Data***
+
+A status update email for the data processing request will be delivered when the order has completed. The order completion email contains URLs for accessing the data outputs.
+Please note that the URLs have an expiration date and are only valid for one week.
+
 
 ### GEDI Combine
 The NASA EarthData Search will collect, clip, and process the GEDI granules, creating a number of zip files with the processed data to download.
@@ -79,11 +102,11 @@ This program cycles through the list of urls supplied, conducting the following 
 After each zip file has been processed and deleted, the DataFrame is written to a csv, parquet, or GeoJSON file, depending on inputs from the user.
 
 #### To Run
-`python gediCombine_individual.py -d DirectoryPath -t FilePath -o gedi_output -f csv -b ul_lat,ul_lon,lr_lat,lr_lon` [source](gediCombine.py)
+`python gediCombine_individual.py -d DirectoryPath -t FilePath -b ul_lat,ul_lon,lr_lat,lr_lon -o gedi_output -f csv ` [source](gediCombine.py)
 
 #### Arguments
 1. ***-d,--dir*** : The directory containing url txt file, formatted with a trailing slash, such that {dir}{fname} is a valid path, for fname a valid file name.
-2. ***-t,--textfile*** : The txt file containing the urls for the zip files, supplied by EarthData Search.
+2. ***-t,--textfile*** : The file path for the txt file containing the downloaded urls of the zip files, supplied by EarthData Search.
 3. ***-b,--bbox*** : The bounding box of the region of interest. In format ul_lat,ul_lon,lr_lat,lr_lon
 4. ***-o,--outfile*** *(optional)* : The stem of the name of the output file, without file extension, optional. The default argument if none is given is *gedi_output*.
 5. ***-f,--filetype*** *(optional)* : The type of file to output. Acceptable formats are: csv, parquet, GeoJSON. The default argument if none is given is *csv*.
