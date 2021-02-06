@@ -279,14 +279,14 @@ def download_url(url : str, dir : str, chunk_size : int = 128) -> None:
     Parameters
     ----------
     url : str
-        "description of parameter"
+        URL used to download data zip package
     dir : str
-        Directory used to store
+        Directory used to store the zip file and unzipped contents
     chunk_size : int
-
+        Determines the size of each chunk written to file during data streaming
     Side Effects
     -------
-    Downloads
+    Downloads and unpacks the zip file from the provide url
     Returns
     -------
     None
